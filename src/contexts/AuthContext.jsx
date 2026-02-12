@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from 'react'
-import { getUserByEmail, createUser } from '../lib/dbHelpers'
+import { createUser, getUserByEmail, checkUserExists } from '../lib/dbHelpers'
 import { generateToken, verifyToken } from '../lib/auth'
 
 const AuthContext = createContext()
@@ -21,7 +21,7 @@ export function AuthProvider({ children }) {
   const signUp = async (email, password, name) => {
     try {
       // Check if user exists
-      const existingUser = await getUserByEmail(email)
+      const existingUser = await checkUserExists(email)
       if (existingUser) {
         return { error: 'User already exists with this email' }
       }

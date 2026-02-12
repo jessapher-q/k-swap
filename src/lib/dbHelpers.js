@@ -61,6 +61,16 @@ export const getUserByEmail = async (email) => {
   }
 }
 
+export const checkUserExists = async (email) => {
+  try {
+    const result = await apiCall('auth-check-user', { email })
+    return result.data
+  } catch (error) {
+    console.error('Error checking if user exists:', error)
+    throw error
+  }
+}
+
 export const createSkill = async (skillData) => {
   try {
     // For now, just return mock data
