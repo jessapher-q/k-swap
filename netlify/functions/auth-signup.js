@@ -1,4 +1,4 @@
-import postgres from 'postgres'
+import { Client } from 'node-postgres'
 
 // Get Neon connection string from environment
 const connectionString = process.env.VITE_NEON_DATABASE_URL
@@ -28,14 +28,16 @@ export async function handler(event) {
     }
 
     // Initialize database connection
-    const db = postgres(connectionString)
+    const client = new Client({ connectionString })
+    await client.connect()
 
     // Check if user exists
-    const existingUser = await db`SELECT * FROM users WHERE email = ${email}`
+    const existingUser = await client.query('SELECT * FROM users WHERE email = $1', [email])
 
-    console.log('Existing user check:', existingUser)
+    console.log('Existing user check:', existingUser.rows)
 
-    if (existingUser.length > 0) {
+    if (existingUser.rows.length > 0) {
+      await client.end()
       return {
         statusCode: 400,
         body: JSON.stringify({ error: 'User already exists with this email' })
@@ -53,13 +55,15 @@ export async function handler(event) {
       location: '' 
     }
 
-    const result = await db`INSERT INTO users (id, email, name, nickname, bio, location) VALUES (${userData.id}, ${userData.email}, ${userData.name}, ${userData.nickname}, ${userData.bio}, ${userData.location}) RETURNING *`
+    const result = await client.query('INSERT INTO users (id, email, name, nickname, bio, location) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *', [userData.id, userData.email, userData.name, userData.nickname, userData.bio, userData.location])
 
-    console.log('User created:', result)
+    console.log('User created:', result.rows)
+
+    await client.end()
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ data: result[0] })
+      body: JSON.stringify({ data: result.rows[0] })
     }
   } catch (error) {
     console.error('Auth signup error:', error)

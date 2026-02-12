@@ -2,6 +2,6 @@
   "name": "k-swap-functions",
   "version": "1.0.0",
   "dependencies": {
-    "postgres": "^3.4.4"
+    "node-postgres": "^1.3.0"
   }
 }

@@ -1,4 +1,4 @@
-import postgres from 'postgres'
+import { Client } from 'node-postgres'
 
 // Get Neon connection string from environment
 const connectionString = process.env.VITE_NEON_DATABASE_URL
@@ -28,14 +28,17 @@ export async function handler(event) {
     }
 
     // Initialize database connection
-    const db = postgres(connectionString)
+    const client = new Client({ connectionString })
+    await client.connect()
 
     // Get user from database
-    const result = await db`SELECT * FROM users WHERE email = ${email}`
+    const result = await client.query('SELECT * FROM users WHERE email = $1', [email])
 
-    console.log('Query result:', result)
+    console.log('Query result:', result.rows)
 
-    if (result.length === 0) {
+    await client.end()
+
+    if (result.rows.length === 0) {
       return {
         statusCode: 400,
         body: JSON.stringify({ error: 'No account found with this email' })
@@ -47,7 +50,7 @@ export async function handler(event) {
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ data: result[0] })
+      body: JSON.stringify({ data: result.rows[0] })
     }
   } catch (error) {
     console.error('Auth signin error:', error)
