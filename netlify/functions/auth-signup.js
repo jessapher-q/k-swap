@@ -1,5 +1,8 @@
 import { sql } from '@vercel/postgres'
 
+// Get Neon connection string from environment
+const connectionString = process.env.VITE_NEON_DATABASE_URL
+
 export async function handler(event) {
   // Only allow POST requests
   if (event.httpMethod !== 'POST') {
@@ -12,8 +15,11 @@ export async function handler(event) {
   try {
     const { email, name } = JSON.parse(event.body)
 
+    // Initialize database connection
+    const db = sql(connectionString)
+
     // Check if user exists
-    const existingUser = await sql`
+    const existingUser = await db`
       SELECT * FROM users WHERE email = ${email}
     `
 
@@ -35,7 +41,7 @@ export async function handler(event) {
       location: '' 
     }
 
-    const result = await sql`
+    const result = await db`
       INSERT INTO users (id, email, name, nickname, bio, location)
       VALUES (${userData.id}, ${userData.email}, ${userData.name}, ${userData.nickname}, ${userData.bio}, ${userData.location})
       RETURNING *

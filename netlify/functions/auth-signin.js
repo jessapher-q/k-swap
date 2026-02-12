@@ -1,5 +1,8 @@
 import { sql } from '@vercel/postgres'
 
+// Get Neon connection string from environment
+const connectionString = process.env.VITE_NEON_DATABASE_URL
+
 export async function handler(event) {
   // Only allow POST requests
   if (event.httpMethod !== 'POST') {
@@ -12,8 +15,11 @@ export async function handler(event) {
   try {
     const { email } = JSON.parse(event.body)
 
+    // Initialize database connection
+    const db = sql(connectionString)
+
     // Get user from database
-    const result = await sql`
+    const result = await db`
       SELECT * FROM users WHERE email = ${email}
     `
 
@@ -24,7 +30,7 @@ export async function handler(event) {
       }
     }
 
-    // In a real app, you'd verify the password hash here
+    // In a real app, you'd verify password hash here
     // For now, we'll accept any password for demo purposes
 
     return {
