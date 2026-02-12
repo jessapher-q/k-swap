@@ -1,4 +1,4 @@
-import { sql } from '@vercel/postgres'
+import postgres from 'postgres'
 
 // Get Neon connection string from environment
 const connectionString = process.env.VITE_NEON_DATABASE_URL
@@ -28,12 +28,10 @@ export async function handler(event) {
     }
 
     // Initialize database connection
-    const db = sql(connectionString)
+    const db = postgres(connectionString)
 
     // Check if user exists
-    const existingUser = await db`
-      SELECT * FROM users WHERE email = ${email}
-    `
+    const existingUser = await db`SELECT * FROM users WHERE email = ${email}`
 
     console.log('Existing user check:', existingUser)
 
@@ -55,11 +53,7 @@ export async function handler(event) {
       location: '' 
     }
 
-    const result = await db`
-      INSERT INTO users (id, email, name, nickname, bio, location)
-      VALUES (${userData.id}, ${userData.email}, ${userData.name}, ${userData.nickname}, ${userData.bio}, ${userData.location})
-      RETURNING *
-    `
+    const result = await db`INSERT INTO users (id, email, name, nickname, bio, location) VALUES (${userData.id}, ${userData.email}, ${userData.name}, ${userData.nickname}, ${userData.bio}, ${userData.location}) RETURNING *`
 
     console.log('User created:', result)
 

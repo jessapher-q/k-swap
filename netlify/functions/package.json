@@ -2,6 +2,6 @@
   "name": "k-swap-functions",
   "version": "1.0.0",
   "dependencies": {
-    "@vercel/postgres": "^0.10.0"
+    "postgres": "^3.4.4"
   }
 }

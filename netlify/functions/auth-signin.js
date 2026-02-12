@@ -1,4 +1,4 @@
-import { sql } from '@vercel/postgres'
+import postgres from 'postgres'
 
 // Get Neon connection string from environment
 const connectionString = process.env.VITE_NEON_DATABASE_URL
@@ -28,12 +28,10 @@ export async function handler(event) {
     }
 
     // Initialize database connection
-    const db = sql(connectionString)
+    const db = postgres(connectionString)
 
     // Get user from database
-    const result = await db`
-      SELECT * FROM users WHERE email = ${email}
-    `
+    const result = await db`SELECT * FROM users WHERE email = ${email}`
 
     console.log('Query result:', result)
 
