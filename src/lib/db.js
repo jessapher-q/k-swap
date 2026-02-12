@@ -6,17 +6,21 @@ const mockUsers = []
 const mockSkills = []
 
 // Mock SQL function for local development
-const mockSQL = async (query, params = []) => {
-  console.log('Mock SQL query:', query, params)
+const mockSQL = async (templateStrings, ...values) => {
+  console.log('Mock SQL query:', templateStrings, values)
+  
+  // Reconstruct the query string
+  let query = templateStrings.join('')
   
   // Handle different query types
   if (query.includes('SELECT * FROM users WHERE email')) {
-    const email = params[0]
-    return mockUsers.filter(user => user.email === email)
+    const email = values[0]
+    const foundUser = mockUsers.find(user => user.email === email)
+    return foundUser ? [foundUser] : []
   }
   
   if (query.includes('INSERT INTO users')) {
-    const userData = params[0]
+    const userData = values[0]
     const newUser = { 
       id: crypto.randomUUID(), 
       created_at: new Date().toISOString(),
@@ -35,7 +39,7 @@ const mockSQL = async (query, params = []) => {
   }
   
   if (query.includes('INSERT INTO skills')) {
-    const skillData = params[0]
+    const skillData = values[0]
     const newSkill = { 
       id: crypto.randomUUID(), 
       created_at: new Date().toISOString(),
