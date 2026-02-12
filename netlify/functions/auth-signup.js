@@ -1,15 +1,32 @@
 import { Client } from 'pg'
 
 // Get Neon connection string from environment
-const connectionString = process.env.VITE_NEON_DATABASE_URL
+const connectionString = process.env.DATABASE_URL
 
 export async function handler(event) {
+  // Handle CORS preflight
+  if (event.httpMethod === 'OPTIONS') {
+    return {
+      statusCode: 200,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': 'Content-Type',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS'
+      },
+      body: ''
+    }
+  }
+  
   console.log('Function invoked:', event.httpMethod)
   
   // Only allow POST requests
   if (event.httpMethod !== 'POST') {
     return {
       statusCode: 405,
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+      },
       body: JSON.stringify({ error: 'Method not allowed' })
     }
   }
@@ -23,6 +40,10 @@ export async function handler(event) {
       console.error('Database connection string not found in environment')
       return {
         statusCode: 500,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*'
+        },
         body: JSON.stringify({ error: 'Database configuration error' })
       }
     }
@@ -40,6 +61,10 @@ export async function handler(event) {
       await client.end()
       return {
         statusCode: 400,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*'
+        },
         body: JSON.stringify({ error: 'User already exists with this email' })
       }
     }
@@ -63,12 +88,22 @@ export async function handler(event) {
 
     return {
       statusCode: 200,
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': 'Content-Type',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS'
+      },
       body: JSON.stringify({ data: result.rows[0] })
     }
   } catch (error) {
     console.error('Auth signup error:', error)
     return {
       statusCode: 500,
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+      },
       body: JSON.stringify({ error: 'Failed to create account. Please try again.' })
     }
   }
