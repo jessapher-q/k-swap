@@ -1,4 +1,4 @@
-import { Client } from 'node-postgres'
+import { Client } from 'pg'
 
 // Get Neon connection string from environment
 const connectionString = process.env.VITE_NEON_DATABASE_URL
